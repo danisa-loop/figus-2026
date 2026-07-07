@@ -52,9 +52,11 @@
   }
   .header-top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
   .logo-ball{
-    width:52px;height:52px;flex-shrink:0;
+    width:52px;height:52px;flex-shrink:0;border-radius:50%;object-fit:cover;
+    border:3px solid #FCBF49;
     animation:spin 8s linear infinite;
     filter:drop-shadow(0 2px 4px rgba(0,0,0,.2));
+    background:#fff;
   }
   @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
   h1{font-size:22px;margin:0;font-weight:900;text-shadow:2px 2px 0 rgba(0,0,0,.15);letter-spacing:-.01em;line-height:1.1;flex:1}
@@ -331,25 +333,17 @@
 <body>
 
 <header>
-  <div class="messi-corner" title="¡GOAT!">🐐</div>
+  <div class="messi-corner" title="¡La Trionda!">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Trionda_%28cropped%29.jpg/80px-Trionda_%28cropped%29.jpg"
+         alt="Adidas Trionda"
+         onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'⚽',style:'font-size:34px'}))"
+         style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:3px solid #FCBF49;box-shadow:0 2px 6px rgba(0,0,0,.2);display:block"/>
+  </div>
   <div class="header-top">
-    <svg class="logo-ball" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-      <!-- Pelota de fútbol estilo dibujito -->
-      <circle cx="50" cy="50" r="46" fill="#FFFFFF" stroke="#1A2E4A" stroke-width="3"/>
-      <!-- Pentágono central -->
-      <polygon points="50,32 62,41 57,55 43,55 38,41" fill="#1A2E4A"/>
-      <!-- Pentágonos alrededor -->
-      <polygon points="50,10 62,18 58,32 42,32 38,18" fill="#1A2E4A" opacity=".85"/>
-      <polygon points="20,45 32,38 40,50 32,62 20,58" fill="#1A2E4A" opacity=".85"/>
-      <polygon points="80,45 68,38 60,50 68,62 80,58" fill="#1A2E4A" opacity=".85"/>
-      <polygon points="35,72 45,66 55,66 65,72 60,85 40,85" fill="#1A2E4A" opacity=".85"/>
-      <!-- Líneas conectoras -->
-      <line x1="50" y1="32" x2="50" y2="18" stroke="#1A2E4A" stroke-width="2"/>
-      <line x1="38" y1="41" x2="28" y2="45" stroke="#1A2E4A" stroke-width="2"/>
-      <line x1="62" y1="41" x2="72" y2="45" stroke="#1A2E4A" stroke-width="2"/>
-      <line x1="43" y1="55" x2="40" y2="66" stroke="#1A2E4A" stroke-width="2"/>
-      <line x1="57" y1="55" x2="60" y2="66" stroke="#1A2E4A" stroke-width="2"/>
-    </svg>
+    <img class="logo-ball"
+         src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Trionda_%28cropped%29.jpg/120px-Trionda_%28cropped%29.jpg"
+         alt="Trionda"
+         onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'⚽',style:'font-size:44px'}))"/>
     <h1>
       MI ÁLBUM MUNDIAL ⭐⭐⭐
       <span>PANINI 2026 · 980 FIGUS</span>
@@ -1216,10 +1210,24 @@ window.addEventListener('load', () => {
   }
 });
 
-// Registrar Service Worker (PWA)
+// Registrar Service Worker (PWA) con detección de updates
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch(err => {
+    navigator.serviceWorker.register('./sw.js').then(reg => {
+      // Chequear cada vez que se abre la app si hay update
+      reg.update();
+      // Si aparece un SW nuevo esperando, recargamos para que tome efecto
+      reg.addEventListener('updatefound', () => {
+        const newWorker = reg.installing;
+        if (!newWorker) return;
+        newWorker.addEventListener('statechange', () => {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            toast('✨ Nueva versión disponible, recargando…');
+            setTimeout(() => window.location.reload(), 1500);
+          }
+        });
+      });
+    }).catch(err => {
       console.warn('SW no registrado:', err);
     });
   });
