@@ -127,7 +127,14 @@
     padding:14px 16px;cursor:pointer;user-select:none;
   }
   .team-head:hover{background:var(--panel-2)}
-  .team-name{display:flex;align-items:center;gap:12px;font-weight:900;font-size:15px}
+  .team-name{display:flex;align-items:center;gap:10px;font-weight:900;font-size:15px}
+  .team-flag{
+    width:36px;height:24px;object-fit:cover;
+    border-radius:4px;border:1px solid rgba(0,0,0,.15);
+    box-shadow:0 1px 2px rgba(0,0,0,.1);
+    flex-shrink:0;
+    background:#f0f0f0;
+  }
   .team-code{
     font-family:var(--mono);font-size:11px;background:var(--sky);color:var(--white);
     padding:4px 8px;border-radius:6px;letter-spacing:.05em;font-weight:700;
@@ -252,46 +259,7 @@
     .logo-ball{width:44px;height:44px}
   }
 
-  /* ===== MODO TOGGLE (adulto vs kids) ===== */
-  .mode-toggle{
-    display:inline-flex;background:rgba(255,255,255,.2);
-    border-radius:999px;padding:3px;gap:2px;
-    border:1px solid rgba(255,255,255,.3);
-  }
-  .mode-toggle button{
-    background:transparent;border:0;color:rgba(255,255,255,.8);
-    padding:5px 12px;border-radius:999px;font-size:12px;cursor:pointer;
-    font-family:var(--fun);font-weight:700;
-  }
-  .mode-toggle button.active{background:var(--white);color:var(--sky-dark)}
-
-  /* Modo adulto: colores más sobrios */
-  body.adult{
-    --sky:#2C5F8D;
-    --sky-light:#7BA5C7;
-    --sky-dark:#1A3E5C;
-    --gold:#B8933F;
-    --gold-dark:#8E6E28;
-    --bg:#F5F7FA;
-    --panel:#FFFFFF;
-    --panel-2:#EDF1F5;
-    --line:#D4DDE5;
-    --ink:#1F2937;
-    --ink-dim:#6B7280;
-    --fun:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-    --radius:8px;
-  }
-  body.adult .messi-corner,
-  body.adult .hero-section{display:none}
-  body.adult h1{text-shadow:none}
-  body.adult .btn{box-shadow:0 1px 0 rgba(0,0,0,.1)}
-  body.adult .team{border-width:1px}
-  body.adult .sticker{border-width:1px}
-  body.adult footer .footer-hero{display:none}
-  body.adult .stat b{font-size:22px}
-  body.adult .logo-ball{animation:none}
-
-  /* ===== HERO SECTION (solo kids) ===== */
+  /* ===== HERO SECTION ===== */
   .hero-section{
     background:linear-gradient(180deg, transparent, rgba(255,255,255,.6));
     padding:16px;margin:0 -16px 16px;border-radius:0 0 20px 20px;
@@ -348,10 +316,7 @@
       MI ÁLBUM MUNDIAL ⭐⭐⭐
       <span>PANINI 2026 · 980 FIGUS</span>
     </h1>
-    <div class="mode-toggle">
-      <button data-mode="kids" class="active">👦 Kids</button>
-      <button data-mode="adult">👤 Adulto</button>
-    </div>
+    <div id="status" style="color:rgba(255,255,255,.9);font-weight:700;font-size:12px">¡Vamos!</div>
   </div>
   <div class="stats">
     <div class="stat"><b id="s-have">0</b><span>Tengo</span></div>
@@ -524,6 +489,74 @@ const TOTAL = 20 + TEAMS.length * STICKERS_PER_TEAM; // 20 + 960 = 980
 const STORAGE_KEY = 'panini-wc2026-tracker-v1';
 let state = loadState();
 
+// Banderas: código → nombre del archivo en Wikimedia Commons
+// URL: https://upload.wikimedia.org/wikipedia/commons/thumb/.../XXpx-Flag_of_YYY.svg.png
+// Usamos códigos que Wikimedia ya normaliza bien
+const FLAGS = {
+  'ARG': 'Flag_of_Argentina.svg',
+  'BRA': 'Flag_of_Brazil.svg',
+  'COL': 'Flag_of_Colombia.svg',
+  'ECU': 'Flag_of_Ecuador.svg',
+  'PAR': 'Flag_of_Paraguay.svg',
+  'URU': 'Flag_of_Uruguay.svg',
+  'CAN': 'Flag_of_Canada_%28Pantone%29.svg',
+  'MEX': 'Flag_of_Mexico.svg',
+  'USA': 'Flag_of_the_United_States.svg',
+  'AUT': 'Flag_of_Austria.svg',
+  'BEL': 'Flag_of_Belgium_%28civil%29.svg',
+  'CRO': 'Flag_of_Croatia.svg',
+  'DEN': 'Flag_of_Denmark.svg',
+  'ENG': 'Flag_of_England.svg',
+  'FRA': 'Flag_of_France.svg',
+  'GER': 'Flag_of_Germany.svg',
+  'ITA': 'Flag_of_Italy.svg',
+  'NED': 'Flag_of_the_Netherlands.svg',
+  'NOR': 'Flag_of_Norway.svg',
+  'POR': 'Flag_of_Portugal.svg',
+  'SCO': 'Flag_of_Scotland.svg',
+  'ESP': 'Flag_of_Spain.svg',
+  'SUI': 'Flag_of_Switzerland_%28Pantone%29.svg',
+  'TUR': 'Flag_of_Turkey.svg',
+  'ALG': 'Flag_of_Algeria.svg',
+  'CIV': 'Flag_of_C%C3%B4te_d%27Ivoire.svg',
+  'CPV': 'Flag_of_Cape_Verde.svg',
+  'EGY': 'Flag_of_Egypt.svg',
+  'GHA': 'Flag_of_Ghana.svg',
+  'MAR': 'Flag_of_Morocco.svg',
+  'RSA': 'Flag_of_South_Africa.svg',
+  'SEN': 'Flag_of_Senegal.svg',
+  'TUN': 'Flag_of_Tunisia.svg',
+  'AUS': 'Flag_of_Australia.svg',
+  'IRN': 'Flag_of_Iran.svg',
+  'JPN': 'Flag_of_Japan.svg',
+  'JOR': 'Flag_of_Jordan.svg',
+  'KOR': 'Flag_of_South_Korea.svg',
+  'KSA': 'Flag_of_Saudi_Arabia.svg',
+  'UZB': 'Flag_of_Uzbekistan.svg',
+  'QAT': 'Flag_of_Qatar.svg',
+  'CRC': 'Flag_of_Costa_Rica.svg',
+  'CUW': 'Flag_of_Cura%C3%A7ao.svg',
+  'HAI': 'Flag_of_Haiti.svg',
+  'PAN': 'Flag_of_Panama.svg',
+  'NZL': 'Flag_of_New_Zealand.svg',
+  'TBD1': null, // sin bandera
+  'TBD2': null
+};
+
+function flagUrl(code){
+  const f = FLAGS[code];
+  if(!f) return null;
+  return `https://upload.wikimedia.org/wikipedia/commons/thumb/${f.slice(0,1).toLowerCase()}/${f.slice(0,1).toLowerCase()}${f.slice(1,2).toLowerCase() || ''}/${f}/60px-${f}.png`;
+}
+
+// Fallback más simple: usar la API que ya genera la URL correcta
+function flagImgUrl(code){
+  const f = FLAGS[code];
+  if(!f) return null;
+  // Formato estándar de Wikimedia Commons thumbnail
+  return `https://commons.wikimedia.org/wiki/Special:FilePath/${f}?width=60`;
+}
+
 function loadState(){
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -577,8 +610,13 @@ function makeSection(idx, code, name, start, count){
 
   const head = document.createElement('div');
   head.className = 'team-head';
+  const flag = idx >= 0 ? flagImgUrl(code) : null;
+  const flagHtml = flag
+    ? `<img class="team-flag" src="${flag}" alt="${code}" loading="lazy" onerror="this.style.display='none'"/>`
+    : (idx === -1 ? '<span style="font-size:24px">⭐</span>' : '<span style="font-size:24px">🏳️</span>');
   head.innerHTML = `
     <div class="team-name">
+      ${flagHtml}
       <span class="team-code">${code}</span>
       <span>${name}</span>
     </div>
@@ -663,7 +701,16 @@ function updateTeamHeader(idx){
   if(txt){
     txt.textContent = `${have}/${total}${dup ? ` · ${dup} repe${dup>1?'s':''}` : ''}`;
   }
-  applyFilter();
+  // Solo re-aplicar el filtro para este equipo (barato)
+  applyFilterToTeam(wrap, have, dup, total);
+}
+
+function applyFilterToTeam(wrap, have, dup, total){
+  let show = true;
+  if(activeFilter === 'incomplete') show = have < total;
+  else if(activeFilter === 'has-dup') show = dup > 0;
+  else if(activeFilter === 'near') show = have < total && have >= total - 4;
+  wrap.style.display = show ? '' : 'none';
 }
 
 function renderStats(){
@@ -1049,20 +1096,6 @@ document.getElementById('btn-do-match').addEventListener('click', () => {
 // ========== INIT ==========
 renderAll();
 
-// ========== TOGGLE MODO ADULTO/KIDS ==========
-const MODE_KEY = 'panini-mode';
-function applyMode(mode){
-  document.body.classList.toggle('adult', mode === 'adult');
-  document.querySelectorAll('.mode-toggle button').forEach(b => {
-    b.classList.toggle('active', b.dataset.mode === mode);
-  });
-  try { localStorage.setItem(MODE_KEY, mode); } catch(e){}
-}
-document.querySelectorAll('.mode-toggle button').forEach(b => {
-  b.addEventListener('click', () => applyMode(b.dataset.mode));
-});
-applyMode(localStorage.getItem(MODE_KEY) || 'kids');
-
 // ========== BACKUP JSON ==========
 document.getElementById('btn-backup-export').addEventListener('click', () => {
   const data = {
@@ -1169,45 +1202,42 @@ function runConfetti(){
   requestAnimationFrame(step);
 }
 
-// Hook: disparar confetti cuando se completa un equipo
+// Hook: disparar confetti cuando se completa un equipo (versión performante)
 const _originalUpdateTeamHeader = updateTeamHeader;
 const teamCompletedBefore = new Set();
+let _appReady = false;
+
 updateTeamHeader = function(idx){
-  const wrap = document.querySelector(`.team[data-idx="${idx}"]`);
-  if(!wrap) { _originalUpdateTeamHeader(idx); return; }
-  const start = +wrap.dataset.start;
-  const total = +wrap.dataset.count;
-  let have = 0;
-  for(let i = 0; i < total; i++){
-    if((state.owned[start + i] || 0) >= 1) have++;
-  }
-  const wasComplete = teamCompletedBefore.has(idx);
-  const isComplete = have === total;
+  // Llamar al original PRIMERO (que ya calcula have/total)
   _originalUpdateTeamHeader(idx);
+
+  // Solo chequear completitud si la app ya arrancó
+  if(!_appReady) return;
+
+  const wrap = document.querySelector(`.team[data-idx="${idx}"]`);
+  if(!wrap) return;
+
+  const wasComplete = teamCompletedBefore.has(idx);
+  const isComplete = wrap.classList.contains('complete');
+
   if(isComplete && !wasComplete){
     teamCompletedBefore.add(idx);
-    // Solo festejar si no es la carga inicial (donde no había cambio real)
-    if(document.readyState === 'complete'){
-      fireConfetti();
-      const name = idx === -1 ? 'los especiales' : TEAMS[idx][1];
-      toast(`🏆 ¡Completaste ${name}!`);
-    }
+    fireConfetti();
+    const name = idx === -1 ? 'los especiales' : TEAMS[idx][1];
+    toast(`🏆 ¡Completaste ${name}!`);
   } else if(!isComplete && wasComplete){
     teamCompletedBefore.delete(idx);
   }
 };
 
-// Inicializar el set de equipos ya completos (para no festejar al cargar)
+// Marcar app lista tras la carga inicial + inicializar set de completos
 window.addEventListener('load', () => {
-  for(let idx = -1; idx < TEAMS.length; idx++){
-    const start = idx === -1 ? 0 : 20 + idx * STICKERS_PER_TEAM;
-    const total = idx === -1 ? 20 : STICKERS_PER_TEAM;
-    let have = 0;
-    for(let i = 0; i < total; i++){
-      if((state.owned[start + i] || 0) >= 1) have++;
-    }
-    if(have === total) teamCompletedBefore.add(idx);
-  }
+  // Guardar qué equipos ya estaban completos al cargar (para no festejar)
+  document.querySelectorAll('.team.complete').forEach(el => {
+    teamCompletedBefore.add(+el.dataset.idx);
+  });
+  // A partir de acá SÍ festejamos si algo se completa
+  _appReady = true;
 });
 
 // Registrar Service Worker (PWA) con detección de updates
