@@ -1,5 +1,5 @@
 // Service Worker - cache básico para offline
-const CACHE = 'figus-v1';
+const CACHE = 'figus-v3';
 const ASSETS = [
   './',
   './index.html',
