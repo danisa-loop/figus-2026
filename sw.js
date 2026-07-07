@@ -1,5 +1,5 @@
-// Service Worker v6 - refresh forzado
-const CACHE = 'figus-v6';
+// Service Worker v8 - refresh forzado
+const CACHE = 'figus-v8';
 const ASSETS = [
   './',
   './index.html',
